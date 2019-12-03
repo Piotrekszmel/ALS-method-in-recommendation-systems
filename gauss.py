@@ -65,10 +65,3 @@ class matrix:
         temp = self.A[i][self.row - 1]
         for j in range(len(self.A)):
             self.A[i][j] = np.float64(self.A[i][j] + (self.A[self.row - 1][j] * (-temp / self.A[self.row - 1][self.row - 1])))
-
-
-
-gauss = matrix([[4, -2, 4, -2], [3, 1, 4, 2], [2, 4, 2, 1], [2, -2, 4, 2]], [8, 7, 10, 2])
-X = gauss.Gauss()
-
-print(X)

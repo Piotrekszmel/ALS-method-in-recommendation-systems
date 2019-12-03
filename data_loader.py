@@ -1,24 +1,21 @@
 import pandas as pd
 import numpy as np 
 
-data_path = "dataset/amazon-meta.txt"
 
-
-def parse_text(text, size):
+def parse_text(size, data_path):
     text = open(data_path, "r")
     ratings = []
     idxs = []
     product_types = []
     titles = []
-    final_list = []
     group_switch = 0
     title_switch = 0 
+    
     for row in text:
         row = row.replace("\n", "")
-        
-        if len(ratings) >= size:
-            break
-        
+        if len(set(titles)) > 0:
+            if len(set(titles)) >= size and len(ratings) / len(set(titles)) == size:
+                break
         
         if 'group: ' in row:
             product_type = "".join(row.split(':')[1]).strip()
@@ -46,16 +43,21 @@ def parse_text(text, size):
                 titles.append(title)
             else: 
                 title_switch = 0
-        
     
+    final_list = []
+    products = []
     for title, product_type, rating, idx in zip(titles, product_types, ratings, idxs):
         final_list.append([product_type, title, idx, rating])
+        if title not in products:
+            products.append(title)
+        if len(products) == size:
+            break 
     
     return final_list
 
 
 def add_rows(df, data_path, size):
-    data = parse_text(data_path, size)
+    data = parse_text(size, data_path)
     for row in data:
         df = df.append(pd.Series(row, index=df.columns), ignore_index=True)
     print('DataFrame Updated!')
@@ -80,16 +82,4 @@ def create_matrix(data_path, size, d):
         R[User_id[row["Id"]]][Product_id[row["Title"]]] = row["Ratings"]
     
     return R, U, P, User_id, Product_id, df
-
-R, U, P, User_id, Product_id, df = create_matrix(data_path, 100, 3)
-
-print(R.shape)
-print(U.shape)
-print(P.shape)
-
-
-
-
-
-
 
