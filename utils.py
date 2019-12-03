@@ -81,7 +81,7 @@ def create_matrix(data_path, size, d):
     for _, row in df.iterrows():
         R[User_id[row["Id"]]][Product_id[row["Title"]]] = row["Ratings"]
     
-    return R, U, P, User_id, Product_id, df
+    return np.asarray(R), np.asarray(U), np.asarray(P), User_id, Product_id, df
 
 
 def create_R_up(R):
@@ -91,9 +91,17 @@ def create_R_up(R):
             if R[i][j] != 0:
                 R_up.append([R[i][j], i, j])
     
-    return R_up
-    
+    return np.asarray(R_up)
 
-def target_function(R_up, U, P):
-    pass
 
+def objective_function(R_up, U, P, lr):
+    value = 0
+    print(U.shape)
+    print(P.shape)
+    print("\n\n")
+    for r, i, j in R_up:
+        i = int(i)
+        j = int(j)
+        
+        value += pow((r - np.matmul(U[:, i].T, P[:, j])), 2) + lr * (sum([pow(np.linalg.norm(U[:, i]), 2) for i in range(i)]) + sum([pow(np.linalg.norm(P[:, j]), 2) for j in range(j)]))
+    return value
