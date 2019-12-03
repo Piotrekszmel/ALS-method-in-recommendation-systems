@@ -83,3 +83,17 @@ def create_matrix(data_path, size, d):
     
     return R, U, P, User_id, Product_id, df
 
+
+def create_R_up(R):
+    R_up = []
+    for i in range(R.shape[0]):
+        for j in range(R.shape[1]):
+            if R[i][j] != 0:
+                R_up.append([R[i][j], i, j])
+    
+    return R_up
+    
+
+def target_function(R_up, U, P):
+    pass
+
