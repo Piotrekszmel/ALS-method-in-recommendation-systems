@@ -4,55 +4,35 @@ import numpy as np
 
 def parse_text(size, data_path):
     text = open(data_path, "r")
-    ratings = []
-    idxs = []
-    product_types = []
     titles = []
-    group_switch = 0
-    title_switch = 0 
+    final_list = []
+    rating = 0
     
     for row in text:
         row = row.replace("\n", "")
-        if len(set(titles)) > 0:
-            if len(set(titles)) >= size and len(ratings) / len(set(titles)) == size:
-                break
+        
+        if len(set(titles)) == size:
+            print(len(final_list))
+            break
         
         if 'group: ' in row:
             product_type = "".join(row.split(':')[1]).strip()
-            product_types.append(product_type)
-            group_switch = 1
-
+            
         if 'title: ' in row:
             row = row.split()
             title = " ".join(word for word in row[1:])
-            titles.append(title)
-            title_switch = 1  
-        
+            
         if 'rating:' in row and 'avg rating' not in row:
             row = row.split(":")
             rating = row[2][1].strip()
             customer_id = row[1][:-6].strip()
-            idxs.append(customer_id)
-            ratings.append(rating)
-            if group_switch == 0:
-                product_types.append(product_type)
-            else: 
-                group_switch = 0
-                
-            if title_switch == 0:
-                titles.append(title)
-            else: 
-                title_switch = 0
-    
-    final_list = []
-    products = []
-    for title, product_type, rating, idx in zip(titles, product_types, ratings, idxs):
-        final_list.append([product_type, title, idx, rating])
-        if title not in products:
-            products.append(title)
-        if len(products) == size:
-            break 
-    
+        
+        if rating != 0:
+            final_list.append([product_type, title, customer_id, rating])
+            titles.append(title)
+            
+            rating = 0
+         
     return final_list
 
 
