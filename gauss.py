@@ -37,16 +37,13 @@ class matrix:
 
     def count(self):
         for row in range(len(self.A) -1, -1, -1):
-            
-            self.A[row, :row] = np.dot(self.A[row, :row], self.X[:row])
-            self.A[row, row + 1:] = np.dot(self.A[row, row + 1:], self.X[row + 1:])
-            print(row)
-            print(self.A[row])
-            values = np.float64(np.sum([-value for i, value in enumerate(self.A[row]) if i != row]))
-            print(values)
+            self.A[row, :row] = np.multiply(self.A[row, :row], self.X[:row].T)
+            self.A[row, row + 1:] = np.multiply(self.A[row, row + 1:], self.X[row + 1:].T)
+            values = np.float64(np.sum(self.A[row]) - self.A[row, row])  
+            values *= -1
             values += np.float64(self.B[row])
             self.X[row] = np.float64(values / self.A[row, row])
-        
+            
         self.A = self.temp_A
         self.B = self.temp_B
 

@@ -24,11 +24,11 @@ for i in range(U.shape[1]):
     U[:, i] = G.Gauss()
     print(U[:, i])
 """
-A = np.asmatrix([[2, 4, 2, 0], [1, 0, -1, 1], [0, 1, 3, -1], [2, 1, 2, 1]], dtype=np.float64)
+A = np.asmatrix([[4, -2, 4, -2], [3, 1, 4, 2], [2, 4, 2, 1], [2, -2, 4, 2]], dtype=np.float64)
 print(A.shape)
-B = np.asmatrix([4, 2, 0, 6], dtype=np.float64).T
+B = np.asmatrix([8, 7, 10, 2], dtype=np.float64).T
 print(B.shape)
 
 G = matrix(A, B)
-print(G.Gauss())
+print("\n\n", G.Gauss())
 #objective_function(R_up, U, P, lr)
