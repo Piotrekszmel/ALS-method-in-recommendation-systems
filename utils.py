@@ -12,7 +12,6 @@ def parse_text(size, data_path):
         row = row.replace("\n", "")
         
         if len(set(titles)) == size:
-            print(len(final_list))
             break
         
         if 'group: ' in row:
