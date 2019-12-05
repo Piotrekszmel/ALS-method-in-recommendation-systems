@@ -75,9 +75,6 @@ def create_R_up(R):
 
 def objective_function(R_up, U, P, lr):
     value = 0
-    print(U.shape)
-    print(P.shape)
-    print("\n\n")
     for r, i, j in R_up:
         i = int(i)
         j = int(j)
