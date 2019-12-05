@@ -32,7 +32,6 @@ class matrix:
             self.row += 1
         
         self.X = self.count()
-        
         return self.X
 
     def count(self):
@@ -53,6 +52,5 @@ class matrix:
         self.B[i] = np.float64(self.B[i] + (self.B[self.row - 1] * (-self.A[i, self.row - 1] / self.A[self.row - 1, self.row - 1])))
         temp = self.A[i , self.row - 1]
         for j in range(len(self.A)):
-            self.A[i, j] = (self.A[i, j] + (self.A[self.row - 1, j] * (-temp / self.A[self.row - 1, self.row - 1])))
-            
-                
+            self.A[i, j] = np.float64((self.A[i, j] + (self.A[self.row - 1, j] * (-temp / self.A[self.row - 1, self.row - 1]))))
+               
