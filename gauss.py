@@ -14,6 +14,7 @@ class matrix:
 
     def Gauss(self):
         for i in range(self.row, len(self.A)):
+            
             values = [(self.A[j, i - 1], j) for j in range(i - 1, len(self.A))]
             max_value = max(abs(value[0]) for value in values)
             index_max = [val[1] for val in values if abs(val[0]) == max_value][0]

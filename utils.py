@@ -2,40 +2,45 @@ import pandas as pd
 import numpy as np 
 from gauss import matrix
 
-def parse_text(size, data_path):
+def parse_text(size, data_path, category):
     text = open(data_path, "r")
     titles = []
     final_list = []
     rating = 0
-    
+    product_flag = 0
+    title_flag = 0
+
     for row in text:
         row = row.replace("\n", "")
         
         if len(set(titles)) == size:
             break
         
-        if 'group: ' in row:
+        if 'group: ' in row and any(cat in row for cat in category):
             product_type = "".join(row.split(':')[1]).strip()
+            product_flag = 1
             
-        if 'title: ' in row:
+        if 'title: ' in row and product_flag == 1:
             row = row.split()
             title = " ".join(word for word in row[1:])
+            title_flag = 1
             
         if 'rating:' in row and 'avg rating' not in row:
             row = row.split(":")
             rating = row[2][1].strip()
             customer_id = row[1][:-6].strip()
         
-        if rating != 0:
+        if rating != 0 and product_flag == 1 and title_flag:
             final_list.append([product_type, title, customer_id, rating])
             titles.append(title)
             rating = 0
+            product_flag = 0
          
     return final_list
 
 
-def add_rows(df, data_path, size):
-    data = parse_text(size, data_path)
+def add_rows(df, data_path, size, category):
+    data = parse_text(size, data_path, category)
     for row in data:
         df = df.append(pd.Series(row, index=df.columns), ignore_index=True)
     print('DataFrame Updated!')
@@ -43,9 +48,9 @@ def add_rows(df, data_path, size):
     return df
 
 
-def create_matrix(data_path, size, d):
+def create_matrix(data_path, size, d, category):
     df = pd.DataFrame(columns=['Group', 'Title', 'Id', 'Ratings'])
-    df = add_rows(df, data_path, size)
+    df = add_rows(df, data_path, size, category)
     users = set(df["Id"])
     df["index"] = range(0, len(df))
     
@@ -57,8 +62,11 @@ def create_matrix(data_path, size, d):
     P = np.zeros(shape=(d, len(Product_id)))
 
     for _, row in df.iterrows():
-        R[User_id[row["Id"]]][Product_id[row["Title"]]] = row["Ratings"]
-    
+        try:
+            R[User_id[row["Id"]]][Product_id[row["Title"]]] = row["Ratings"]
+        except:
+            continue
+        
     return np.asarray(R), np.asarray(U), np.asarray(P), User_id, Product_id, df
 
 
@@ -76,18 +84,17 @@ def objective_function(R_up, U, P, lr):
     for r, i, j in R_up:
         i = int(i)
         j = int(j)
-        
         value += pow((r - np.matmul(U[:, i].T, P[:, j])), 2) + lr * (sum([pow(np.linalg.norm(U[:, i]), 2) for i in range(i)]) + sum([pow(np.linalg.norm(P[:, j]), 2) for j in range(j)]))
     return value
 
 
-def recommendation(data_path, d, n, l, lr):   
-    R, U, P, User_id, Product_id, df = create_matrix(data_path, n, d)
-
+def recommendation(data_path, d, n, l, lr, category):   
+    R, U, P, User_id, Product_id, df = create_matrix(data_path, n, d, category)
+    
     R_up = create_R_up(R)
     U = np.random.uniform(0, 1, (U.shape[0], U.shape[1]))
     P = np.random.uniform(0, 1, (P.shape[0], P.shape[1]))
-
+    
     U = np.matrix(U)
     P = np.matrix(P)
     R = np.matrix(R)
@@ -109,8 +116,11 @@ def recommendation(data_path, d, n, l, lr):
             P[:, k] = G.Gauss()
             
         value = objective_function(R_up, U, P, lr)
-        
-        if i % 10 == 0:
+        if l > 20:
+            if i % 10 == 0:
+                print(value)
+        else:
             print(value)
     print("\n")
     return R, U, P, User_id, Product_id, df
+
