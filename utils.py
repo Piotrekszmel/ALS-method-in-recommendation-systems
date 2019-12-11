@@ -105,7 +105,7 @@ def create_matrices(titles, d, top_n):
 
     sorted_idx = sorted(idxs.items(), key=operator.itemgetter(1))     
     top_idx = sorted_idx[-top_n:]
-
+    
     R = np.zeros(shape=(top_n, len(titles)))
     for i, title in enumerate(titles):
         indexes = [id for id in title["Id"]]
@@ -113,13 +113,17 @@ def create_matrices(titles, d, top_n):
             if idx[0] in indexes:
                 R[j, i] = title["Ratings"].loc[title["Id"] == idx[0]][-1:]
 
+    for i, title in enumerate(titles):
+        indexes = indexes = [id for id in title["Id"]]
+
+
     U = np.zeros(shape=(d, R.shape[0]))
     P = np.zeros(shape=(d, R.shape[1]))
 
     return R, U, P
 
 
-def recommendation(R, U, P, l, lr, d):   
+def recommendation(R, U, P, l, lr, d, p = 1):   
     #R, U, P, User_id, Product_id, df = create_matrix(data_path, n, d, category)
     
     R_up = create_R_up(R)
@@ -129,32 +133,30 @@ def recommendation(R, U, P, l, lr, d):
     U = np.matrix(U)
     P = np.matrix(P)
     R = np.matrix(R)
-    
+    print(R)
     for i in range(l):
         for k in range(U.shape[1]):
-            I = [int(p) for r, u, p in R_up if u == k]
+            I = np.flatnonzero(R[k])
             A = np.dot(P[:, I], P[:, I].T) + lr * np.eye(d)
             V = np.sum([R[k, j] * P[:, j] for j in I], axis=0)
             G = matrix(A, V)
             U[:, k] = G.Gauss()
             
         for k in range(P.shape[1]):
-            I = [int(u) for r, u, p in R_up if u == k]
+            I = np.flatnonzero(R[:, k])
             B = np.dot(U[:, I], U[:, I].T) + lr * np.eye(d)
-            
-            V = np.sum([R[k, j] * U[:, j] for j in I], axis=0)
+            V = np.sum([R[j, k] * U[:, j] for j in I], axis=0)
             G = matrix(B, V)
             P[:, k] = G.Gauss()
             
         value = objective_function(R_up, U, P, lr)
-        if l > 20:
-            if i % 10 == 0:
+        if p == 1:
+            if l > 20:
+                if i % 10 == 0:
+                    print(value)
+            else:
                 print(value)
-        else:
-            print(value)
-    print("\n")
     return R, U, P
-
 
 """
 def GEPP(A, b, doPricing = False):
