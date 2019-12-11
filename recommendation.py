@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from utils import recommendation, create_matrix, add_rows
+from utils import recommendation, create_matrix, add_rows, create_matrices
 import operator
 
 LR = 0.4
@@ -22,35 +22,26 @@ title7 = data.loc[data["Title"] == "The Kama Sutra of Vatsyayana"]
 idxs = {}
 titles = [title1, title2, title5, title6, title7]
 
-for title in titles:
-    for idx in title["Id"]:
-        if idx in idxs:
-            idxs[idx] += 1
-        else: 
-            idxs[idx] = 1
 
-sorted_idx = sorted(idxs.items(), key=operator.itemgetter(1))     
-top_idx = sorted_idx[-10:]
-
-R = np.zeros(shape=(10, 5))
-for i, title in enumerate(titles):
-    indexes = [id for id in title["Id"]]
-    for j, idx in enumerate(top_idx):
-        if idx[0] in indexes:
-            R[j, i] = title["Ratings"].loc[title["Id"] == idx[0]][-1:]
-
-U = np.zeros(shape=(D, R.shape[0]))
-P = np.zeros(shape=(D, R.shape[1]))
-
+R, U, P = create_matrices(titles, D, 10)
 
 R, U, P = recommendation(R, U, P, L, LR, D)
+R = np.array(R)
 
+R_ = np.array(np.matmul(U.T, P))
 
+for val in R_:
+    for v in val:
+        print(int(v), end=" ")
+    print()
+print("\n\n")
 
+for val in R:
+    for v in val:
+        print(int(v), end=" ")
+    print()
 
-
-
-
+print("\n")
 
 
 

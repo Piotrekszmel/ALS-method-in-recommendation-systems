@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np 
+import operator
+
 from gauss import matrix
 
 def parse_text(size, data_path, category):
@@ -90,6 +92,31 @@ def objective_function(R_up, U, P, lr):
         j = int(j)
         value += pow((r - np.matmul(U[:, i].T, P[:, j])), 2) + lr * (sum([pow(np.linalg.norm(U[:, i]), 2) for i in range(i)]) + sum([pow(np.linalg.norm(P[:, j]), 2) for j in range(j)]))
     return value
+
+
+def create_matrices(titles, d, top_n):
+    idxs = {}
+    for title in titles:
+        for idx in title["Id"]:
+            if idx in idxs:
+                idxs[idx] += 1
+            else: 
+                idxs[idx] = 1
+
+    sorted_idx = sorted(idxs.items(), key=operator.itemgetter(1))     
+    top_idx = sorted_idx[-top_n:]
+
+    R = np.zeros(shape=(top_n, len(titles)))
+    for i, title in enumerate(titles):
+        indexes = [id for id in title["Id"]]
+        for j, idx in enumerate(top_idx):
+            if idx[0] in indexes:
+                R[j, i] = title["Ratings"].loc[title["Id"] == idx[0]][-1:]
+
+    U = np.zeros(shape=(d, R.shape[0]))
+    P = np.zeros(shape=(d, R.shape[1]))
+
+    return R, U, P
 
 
 def recommendation(R, U, P, l, lr, d):   
