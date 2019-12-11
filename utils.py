@@ -4,6 +4,7 @@ import operator
 
 from gauss import matrix
 
+
 def parse_text(size, data_path, category):
     text = open(data_path, "r")
     titles = []
@@ -11,7 +12,7 @@ def parse_text(size, data_path, category):
     rating = 0
     product_flag = 0
     title_flag = 0
-
+    
     for row in text:
         row = row.replace("\n", "")
         
@@ -40,13 +41,12 @@ def parse_text(size, data_path, category):
             product_flag = 0,
             if len(titles) % 100000 == 0:
                 print(len(titles))
-         
     return final_list
 
 
 def add_rows(df, data_path, size, category):
     data = parse_text(size, data_path, category)
-    print("appending...\n")
+    print("appending...")
     for row in data:
         df = df.append(pd.Series(row, index=df.columns), ignore_index=True)
     print('DataFrame Updated!')
@@ -94,14 +94,35 @@ def objective_function(R_up, U, P, lr):
     return value
 
 
-def create_matrices(titles, d, top_n):
+def create_matrices(group, d, top_n, n, data_path=None, titles=None):
     idxs = {}
-    for title in titles:
-        for idx in title["Id"]:
-            if idx in idxs:
-                idxs[idx] += 1
-            else: 
-                idxs[idx] = 1
+
+    if titles is not None:
+        for title in titles:
+            for idx in title["Id"]:
+                if idx in idxs:
+                    idxs[idx] += 1
+                else: 
+                    idxs[idx] = 1
+
+    elif data_path is not None:
+        titles = []
+        data = pd.read_csv(data_path, index_col=False)
+        data = data[data["Group"] == group]
+        top_products = data["Title"].value_counts()[:n].index.tolist()
+        for i in range(n):
+            titles.append(data.loc[data["Title"] == top_products[i]])
+        
+        for title in titles:
+            for idx in title["Id"]:
+                if idx in idxs:
+                    idxs[idx] += 1
+                else: 
+                    idxs[idx] = 1
+
+            
+    else:
+        return "data_path or titles required"
 
     sorted_idx = sorted(idxs.items(), key=operator.itemgetter(1))     
     top_idx = sorted_idx[-top_n:]
@@ -133,7 +154,6 @@ def recommendation(R, U, P, l, lr, d, p = 1):
     U = np.matrix(U)
     P = np.matrix(P)
     R = np.matrix(R)
-    print(R)
     for i in range(l):
         for k in range(U.shape[1]):
             I = np.flatnonzero(R[k])
