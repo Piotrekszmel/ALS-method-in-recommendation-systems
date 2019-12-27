@@ -52,8 +52,6 @@ for x, learning_rate in enumerate(LR):
                 reviews.append(R[i][index])
                 R[i][index] = 0.0
             
-
-        
         R, U, P, cost = recommendation(R, U, P, L, learning_rate, dim, 0)
         end = time.time()
         R = np.array(R)
@@ -70,20 +68,11 @@ for x, learning_rate in enumerate(LR):
         
         times.append(end - start)
         costs.append(average_error(np.array(R_test), U, P))
-        #print(x)
     plt.plot([d for d in D], [c for c in costs], label="lr = " + str(learning_rate))
         
         
-        
-
-    
-plt.xlabel("d")
 plt.ylabel("error")
 plt.legend()
 
 plt.show()
 
-#plt.clf()
-#plt.plot([dim for dim in D], [t for t in times], label="time")
-#plt.legend()
-#plt.show()
