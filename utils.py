@@ -144,6 +144,15 @@ def create_matrices(group, d, top_n, n, data_path=None, titles=None):
     return R, U, P
 
 
+def average_error(R_up, U, P):
+    n = len(R_up)
+    error = 0
+    for r, i, j in R_up:
+        i = int(i)
+        j = int(j)
+        error += pow((r - np.matmul(U[:, i].T, P[:, j])), 2)
+    return error / n
+
 def recommendation(R, U, P, l, lr, d, p = 1):   
     #R, U, P, User_id, Product_id, df = create_matrix(data_path, n, d, category)
     cost = []
